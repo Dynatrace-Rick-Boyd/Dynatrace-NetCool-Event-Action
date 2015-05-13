@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Require-Bundle: com.dynatrace.diagnostics.sdk
+Bundle-Vendor: Dynatrace Community
+Bundle-ClassPath: .
+Bundle-Version: 0.0.1
+Bundle-Name: NetCool Event Action
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: com.dynatrace.diagnostics.plugin.NetCoolAction;si
+ ngleton:=true
+

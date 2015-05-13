@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<!-- plugin.xml file written by dynaTrace Client 6.1.0 -->
+<plugin>
+  <extension point="com.dynatrace.diagnostics.pdk.pluginconfig" id="com.dynatrace.diagnostics.plugin.NetCoolAction" name="NetCool Event Action">
+    <information>
+      <category value="" />
+      <displayname value="NetCool Event Action" />
+      <description value="This plugin sends incident details to Tivoli NetCool/Omnibus as events" />
+    </information>
+    <configuration>
+      <property key="server" label="Server Address" type="string" description="Server endpoint" default="netcool-prod.corp.mycompany.com" multiline="false" />
+      <property key="port" label="Server Port" type="string" description="Port for server endpoint" default="" multiline="false" />
+    </configuration>
+  </extension>
+  <extension point="com.dynatrace.diagnostics.pdk.action" id="com.dynatrace.diagnostics.plugin.NetCoolEventAction" name="NetCool Event Action">
+    <plugin configid="com.dynatrace.diagnostics.plugin.NetCoolAction" class="com.dynatrace.diagnostics.plugin.NetCoolEventAction" />
+  </extension>
+</plugin>
+
