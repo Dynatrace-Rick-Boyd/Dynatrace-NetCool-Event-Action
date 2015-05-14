@@ -1,7 +1,12 @@
 Manifest-Version: 1.0
 Require-Bundle: com.dynatrace.diagnostics.sdk
 Bundle-Vendor: Dynatrace Community
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/evd.jar,
+ lib/log.jar,
+ lib/xercesImpl-4.2.2.jar,
+ lib/xml-apis-4.2.2.jar,
+ lib/zce.jar
 Bundle-Version: 0.0.1
 Bundle-Name: NetCool Event Action
 Bundle-ManifestVersion: 2

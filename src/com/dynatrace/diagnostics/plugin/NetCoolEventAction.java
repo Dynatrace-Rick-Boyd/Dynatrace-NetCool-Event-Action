@@ -8,13 +8,24 @@
 package com.dynatrace.diagnostics.plugin;
 
 import com.dynatrace.diagnostics.pdk.*;
+
+import java.io.*;
+import java.security.InvalidParameterException;
 import java.util.logging.Logger;
+import com.tivoli.tec.event_delivery.*;
 
 
 public class NetCoolEventAction implements Action {
 
 	private static final Logger log = Logger.getLogger(NetCoolEventAction.class.getName());
-
+	private static final String SERVER_NAME = "server";
+	private static final String SERVER_PORT = "port";
+	
+	private String serverName;
+	private String serverPort;
+	
+	TECAgent sender;
+	
 	/**
 	 * Initializes the Action Plugin. This method is always 
 	 * called before <tt>execute</tt>.
@@ -30,7 +41,31 @@ public class NetCoolEventAction implements Action {
 	 */
 	@Override
 	public Status setup(ActionEnvironment env) throws Exception {
-		// TODO
+
+		String cfg;
+		Reader configStream;
+		
+		try {
+			serverName = env.getConfigString(SERVER_NAME);
+			serverPort = env.getConfigString(SERVER_PORT);
+		} catch (NullPointerException ex) {
+			return new Status(Status.StatusCode.ErrorInternal, "Missing configuration property", "Missing configuration property", ex);
+		} catch (InvalidParameterException ipe) {
+			return new Status(Status.StatusCode.ErrorInternal, "Invalid configuration property", "Invalid configuration property", ipe);
+		}
+		
+		cfg = "ServerLocation=" + serverName + 
+				"\nServerPort=" + serverPort +
+				"\nBufferEvents=MEMORY_ONLY" +
+				"\nBufferFlushRate=0";
+		log.info(cfg);
+		
+		configStream = new StringReader(cfg);
+		try {
+		sender = new TECAgent(configStream, TECAgent.SENDER_MODE, true);
+		} catch (EDException edex) {
+			return new Status(Status.StatusCode.ErrorTargetService, "Error initializing sending agent", "Error initializing sending agent", edex);
+		}
 		return new Status(Status.StatusCode.Success);
 	}
 
