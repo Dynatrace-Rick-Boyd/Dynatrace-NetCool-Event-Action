@@ -9,10 +9,6 @@ package com.dynatrace.diagnostics.plugin;
 
 import com.dynatrace.diagnostics.pdk.*;
 
-import java.security.InvalidParameterException;
-import java.util.Collection;
-import java.util.logging.Logger;
-
 import com.dynatrace.diagnostics.plugin.extendedexecutor.*;
 
 public class NetCoolEventAction extends GenericExecutor implements Action {

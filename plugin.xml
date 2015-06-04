@@ -10,8 +10,32 @@
       <supportlevel value="unsupported" />
     </information>
     <configuration>
-      <property key="server" label="Server Address" type="string" description="Server endpoint" default="netcool-prod.corp.mycompany.com" multiline="false" />
-      <property key="port" label="Server Port" type="string" description="Port for server endpoint" default="" multiline="false" />
+      <property key="wsdl" label="WS WSDL" type="string" description="URL to the WSDL file" default="" multiline="false" />
+      <property key="wsOperation" label="WS Operation" type="string" description="Name of the web service operation" default="" multiline="false" />
+      <property key="wsParameters" label="WS Parameters" type="string" description="Parameter-name=parameter-value pairs which will be used for substitution of parameters. One pair per line." default="" multiline="true" />
+      <property key="isWSProxy" label="Use Web Service Proxy?" type="boolean" description="Boolean indicator which is set to TRUE when WS are used and to FALSE when command is executing" default="false" />
+      <property key="isDotNET" label="isDotNET" type="boolean" description="Is &quot;true&quot; when plugin invokes .NET web service" default="false" />
+      <property key="wsProxyHost" label="WS Proxy Host" type="string" description="WS Proxy Host" default="" multiline="false">
+        <visibility>
+          <rule key="isWSProxy" value="true" />
+        </visibility>
+      </property>
+      <property key="wsProxyPort" label="WS Proxy Port" type="long" description="WS Proxy Port" default="6670">
+        <visibility>
+          <rule key="isWSProxy" value="true" />
+        </visibility>
+      </property>
+      <property key="wsProxyUser" label="WS Proxy Authentication User" type="string" description="User to authenticate access through proxy" default="" multiline="false">
+        <visibility>
+          <rule key="isWSProxy" value="true" />
+        </visibility>
+      </property>
+      <property key="wsProxyPassword" label="WS Proxy Authentication Password" type="password" description="Password which will be used to authenticate user's requests coming through the proxy" default="">
+        <visibility>
+          <rule key="isWSProxy" value="true" />
+        </visibility>
+      </property>
+      <property key="wsUsePrefix" label="WS Use Prefix" type="boolean" description="indicator which shows if plugin will add a namespace prefix to child elements in the SOAP request" default="false" />
     </configuration>
   </extension>
   <extension point="com.dynatrace.diagnostics.pdk.action" id="com.dynatrace.diagnostics.plugin.NetCoolEventAction" name="NetCool Event Action">

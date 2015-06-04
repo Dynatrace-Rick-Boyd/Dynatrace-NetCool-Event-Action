@@ -1,4 +1,4 @@
-package com.dynatrace.diagnostics.remoteconnection;
+package com.dynatrace.diagnostics.plugin.extendedexecutor.remoteconnection;
 
 public class GEReturnObject {
 	private String output = null;
