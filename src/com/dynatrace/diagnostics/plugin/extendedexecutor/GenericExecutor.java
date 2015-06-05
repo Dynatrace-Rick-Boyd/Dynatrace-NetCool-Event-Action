@@ -21,8 +21,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
@@ -46,7 +45,6 @@ import com.dynatrace.diagnostics.pdk.MonitorMeasure;
 import com.dynatrace.diagnostics.pdk.PluginEnvironment;
 import com.dynatrace.diagnostics.pdk.Status;
 import com.dynatrace.diagnostics.pdk.Status.StatusCode;
-import com.dynatrace.diagnostics.pdk.TaskEnvironment;
 import com.dynatrace.diagnostics.plugin.actionhelper.ActionData;
 import com.dynatrace.diagnostics.plugin.actionhelper.ActionHelper;
 import com.dynatrace.diagnostics.plugin.actionhelper.HelperUtils;
@@ -57,7 +55,6 @@ import com.dynatrace.diagnostics.plugin.extendedexecutor.helper.GEPluginProperti
 import com.dynatrace.diagnostics.plugin.extendedexecutor.helper.WSElement;
 import com.dynatrace.diagnostics.plugin.extendedexecutor.helper.WsOpParams;
 import com.dynatrace.diagnostics.plugin.extendedexecutor.remoteconnection.GEReturnObject;
-import com.dynatrace.diagnostics.sdk.resources.BaseConstants;
 import com.predic8.schema.ComplexType;
 import com.predic8.schema.Element;
 import com.predic8.schema.TypeDefinition;
@@ -79,7 +76,7 @@ public class GenericExecutor implements GEPluginConstants {
 
 	private static final Logger log = Logger.getLogger(GenericExecutor.class.getName());
 	
-//	static DebugStructure dbgStr = new DebugStructure();
+
 	
 	protected Status setup(PluginEnvironment env) throws Exception {
   		String msg;
@@ -89,14 +86,12 @@ public class GenericExecutor implements GEPluginConstants {
   
   		// Set environmental configuration parameters
   		try {
-  			if (!env.getConfigBoolean("isWS")) {
-  				pp = setConfiguration(env);
-  			} else {
+  			
   				pp = setConfigurationWs(env);
-  				pp.setWs(env.getConfigBoolean("isWS"));
-  			}
+  //				pp.setWs(env.getConfigBoolean("isWS"));
+  			
   		} catch (Exception e) {
-  			log.severe("setup method: " + HelperUtils.getExceptionAsString(e));
+  			log.severe("setup method: " + e.getMessage());
   			return new Status(StatusCode.ErrorInternalConfigurationProblem, e.getMessage(), e.getMessage(), e);
   		}
   		
@@ -129,7 +124,8 @@ public class GenericExecutor implements GEPluginConstants {
   			
   			Definitions defs;
   			//   set definitions
-  			pp.setWsDefinitions(defs = parser.parse(pp.getWsWSDL()));
+  			//log.info(this.getClass().getClassLoader().getResource("/res/ImpactWebServiceListenerDL.wsdl").toString());
+  			pp.setWsDefinitions(defs = parser.parse(this.getClass().getResourceAsStream("/res/ImpactWebServiceListenerDL.wsdl")));
   			//   set targetNamespace
   			pp.setWsTargetNamespace(defs.getTargetNamespace());
   			//   check if operation is present in the wsdl
@@ -285,60 +281,8 @@ public class GenericExecutor implements GEPluginConstants {
 			  			});
 		  	       	}
 	  			}
-	  	        	
-	  			// define service
-	  			QName operationQName = new QName(pp.getWsTargetNamespace(), pp.getWsOperationName());
-	  			QName portQName = new QName(pp.getWsTargetNamespace(), pp.getWsPortName());
-	  			javax.xml.ws.Service svc = javax.xml.ws.Service.create(operationQName);
-	  			svc.addPort(portQName, pp.getWsBindingId(), pp.getWsLocation());
-	  
-	  			// create dispatch object from this service
-	  			Dispatch<SOAPMessage> dispatch = svc.createDispatch(portQName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
-	  			// The soapActionUri is set here. otherwise we get an error on .net based services.
-	  			if (pp.isDotNET()) {
-		  		    String soapActionUri = new StringBuilder(pp.getWsTargetNamespace()).append("/").append(pp.getWsOperationName()).toString();
-		  	        dispatch.getRequestContext().put(Dispatch.SOAPACTION_USE_PROPERTY, new Boolean(true));
-		  	        dispatch.getRequestContext().put(Dispatch.SOAPACTION_URI_PROPERTY, soapActionUri);
-		  		    if (log.isLoggable(Level.FINER)) {
-		  		    	log.finer("execute method: soapActionUri is '" + soapActionUri + "'");
-		  		    }
-	  			}
-	  			
-	  			// add SOAP message
-	  			MessageFactory factory = MessageFactory.newInstance();
-	  
-	  		    SOAPMessage request = factory.createMessage();
-	  		    SOAPEnvelope envelope = request.getSOAPPart().getEnvelope();
-	  		    
-	  		    SOAPBody soapBody = request.getSOAPBody();
-	  		    soapBody.addNamespaceDeclaration("q0", pp.getWsTargetNamespace());
-	  		    SOAPBodyElement soapBodyElement = soapBody.addBodyElement(envelope.createName(pp.getWsOperationName(), "q0", pp.getWsTargetNamespace()));
-	  		    // add parameters
-		        for (Element p : pp.getWsOpParams().getArgList()) {
-		        	addElement(p, getComplexTypeStructure(p.getName(), pp.getWsOpParams()), soapBodyElement, pp);
-				}
-		        if (log.isLoggable(Level.FINER)) {
-			        ByteArrayOutputStream out = new ByteArrayOutputStream();
-			        request.writeTo(out);
-			        String msgString = new String(out.toByteArray(), DEFAULT_ENCODING);
-			        log.finer("execute method: SOAP request is '" + msgString + "'");
-		        }
-		        // invoke web service
-				SOAPMessage response = dispatch.invoke(request);
-	  				
-				org.w3c.dom.Node wrapper = response.getSOAPBody().getFirstChild() ;
-			    while(wrapper.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
-			    	wrapper = wrapper.getNextSibling() ;
-			    }
-			    org.w3c.dom.Node part = wrapper.getFirstChild() ;
-			    while(part.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
-			    	part = part.getNextSibling() ;
-			    }
-			    output = part.getFirstChild().getNodeValue() ;
-	  
-			    if (log.isLoggable(Level.FINER)) {
-			    	log.finer("execute method: Web service returned '" + output + "'");
-			    }
+	  	        executeLoginWS();
+	  	        executeRunPolicyWS();
   			} catch (Exception e) {
   				String msg;
   				StringBuilder sb = new StringBuilder("execute method: exception is '").append(HelperUtils.getExceptionAsString(e)).append("'");
@@ -420,7 +364,8 @@ public class GenericExecutor implements GEPluginConstants {
 			}
 		}
 	}
-
+	
+	/*
 	private GEPluginProperties setConfiguration(PluginEnvironment env) {
 		// Variable which holds reference to parameters values
 		String value;
@@ -475,7 +420,7 @@ public class GenericExecutor implements GEPluginConstants {
 				}
 			} 
 		} */
-		
+		/*
 		// set host and port for monitor and task
 		if (env instanceof MonitorEnvironment || env instanceof TaskEnvironment) {
 			Long p = env.getConfigLong(CONFIG_PORT) != null && env.getConfigLong(CONFIG_PORT) > 0 ? env.getConfigLong(CONFIG_PORT) : DEFAULT_PORT;
@@ -541,6 +486,7 @@ public class GenericExecutor implements GEPluginConstants {
 			}
 		}
 		*/
+		/*
 		if (log.isLoggable(Level.FINER)) {
 			log.finer("GE Plugin Properties: method is '" + props.getMethod()
 					+ "'," + LS + " authMethod is '" + props.getAuthMethod() + "'"
@@ -559,8 +505,123 @@ public class GenericExecutor implements GEPluginConstants {
 
 		return props;
 	}
-	
+	*/
 	// WS methods
+	private void executeRunPolicyWS() {
+		
+			// define service
+			QName operationQName = new QName(pp.getWsTargetNamespace(), "runPolicy");
+			QName portQName = new QName(pp.getWsTargetNamespace(), pp.getWsPortName());
+			javax.xml.ws.Service svc = javax.xml.ws.Service.create(operationQName);
+			svc.addPort(portQName, pp.getWsBindingId(), pp.getWsLocation());
+
+			// create dispatch object from this service
+			Dispatch<SOAPMessage> dispatch = svc.createDispatch(portQName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+			// The soapActionUri is set here. otherwise we get an error on .net based services.
+			if (pp.isDotNET()) {
+  		    String soapActionUri = new StringBuilder(pp.getWsTargetNamespace()).append("/").append(pp.getWsOperationName()).toString();
+  	        dispatch.getRequestContext().put(Dispatch.SOAPACTION_USE_PROPERTY, new Boolean(true));
+  	        dispatch.getRequestContext().put(Dispatch.SOAPACTION_URI_PROPERTY, soapActionUri);
+  		    if (log.isLoggable(Level.FINER)) {
+  		    	log.finer("execute method: soapActionUri is '" + soapActionUri + "'");
+  		    }
+			}
+			
+			// add SOAP message
+			MessageFactory factory = MessageFactory.newInstance();
+
+		    SOAPMessage request = factory.createMessage();
+		    SOAPEnvelope envelope = request.getSOAPPart().getEnvelope();
+		    
+		    SOAPBody soapBody = request.getSOAPBody();
+		    soapBody.addNamespaceDeclaration("q0", pp.getWsTargetNamespace());
+		    SOAPBodyElement soapBodyElement = soapBody.addBodyElement(envelope.createName(pp.getWsOperationName(), "q0", pp.getWsTargetNamespace()));
+		    // add parameters
+        for (Element p : pp.getWsOpParams().getArgList()) {
+        	addElement(p, getComplexTypeStructure(p.getName(), pp.getWsOpParams()), soapBodyElement, pp);
+		}
+        if (log.isLoggable(Level.FINER)) {
+	        ByteArrayOutputStream out = new ByteArrayOutputStream();
+	        request.writeTo(out);
+	        String msgString = new String(out.toByteArray(), DEFAULT_ENCODING);
+	        log.finer("execute method: SOAP request is '" + msgString + "'");
+        }
+        // invoke web service
+		SOAPMessage response = dispatch.invoke(request);
+				
+		org.w3c.dom.Node wrapper = response.getSOAPBody().getFirstChild() ;
+	    while(wrapper.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
+	    	wrapper = wrapper.getNextSibling() ;
+	    }
+	    org.w3c.dom.Node part = wrapper.getFirstChild() ;
+	    while(part.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
+	    	part = part.getNextSibling() ;
+	    }
+	    output = part.getFirstChild().getNodeValue() ;
+
+	    if (log.isLoggable(Level.FINER)) {
+	    	log.finer("execute method: Web service returned '" + output + "'");
+	    }
+	}
+	
+	private void executeLoginWS() {
+		
+		// define service
+		QName operationQName = new QName(pp.getWsTargetNamespace(), "login");
+		QName portQName = new QName(pp.getWsTargetNamespace(), pp.getWsPortName());
+		javax.xml.ws.Service svc = javax.xml.ws.Service.create(operationQName);
+		svc.addPort(portQName, pp.getWsBindingId(), pp.getWsLocation());
+
+		// create dispatch object from this service
+		Dispatch<SOAPMessage> dispatch = svc.createDispatch(portQName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+		// The soapActionUri is set here. otherwise we get an error on .net based services.
+		if (pp.isDotNET()) {
+		    String soapActionUri = new StringBuilder(pp.getWsTargetNamespace()).append("/").append(pp.getWsOperationName()).toString();
+	        dispatch.getRequestContext().put(Dispatch.SOAPACTION_USE_PROPERTY, new Boolean(true));
+	        dispatch.getRequestContext().put(Dispatch.SOAPACTION_URI_PROPERTY, soapActionUri);
+		    if (log.isLoggable(Level.FINER)) {
+		    	log.finer("execute method: soapActionUri is '" + soapActionUri + "'");
+		    }
+		}
+		
+		// add SOAP message
+		MessageFactory factory = MessageFactory.newInstance();
+
+	    SOAPMessage request = factory.createMessage();
+	    SOAPEnvelope envelope = request.getSOAPPart().getEnvelope();
+	    
+	    SOAPBody soapBody = request.getSOAPBody();
+	    soapBody.addNamespaceDeclaration("q0", pp.getWsTargetNamespace());
+	    SOAPBodyElement soapBodyElement = soapBody.addBodyElement(envelope.createName(pp.getWsOperationName(), "q0", pp.getWsTargetNamespace()));
+	    // add parameters
+    for (Element p : pp.getWsOpParams().getArgList()) {
+    	addElement(p, getComplexTypeStructure(p.getName(), pp.getWsOpParams()), soapBodyElement, pp);
+	}
+    if (log.isLoggable(Level.FINER)) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        request.writeTo(out);
+        String msgString = new String(out.toByteArray(), DEFAULT_ENCODING);
+        log.finer("execute method: SOAP request is '" + msgString + "'");
+    }
+    // invoke web service
+	SOAPMessage response = dispatch.invoke(request);
+			
+	org.w3c.dom.Node wrapper = response.getSOAPBody().getFirstChild() ;
+    while(wrapper.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
+    	wrapper = wrapper.getNextSibling() ;
+    }
+    org.w3c.dom.Node part = wrapper.getFirstChild() ;
+    while(part.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
+    	part = part.getNextSibling() ;
+    }
+    output = part.getFirstChild().getNodeValue() ;
+
+    if (log.isLoggable(Level.FINER)) {
+    	log.finer("execute method: Web service returned '" + output + "'");
+    }
+}
+
+	
   	private GEPluginProperties setConfigurationWs(PluginEnvironment env) {
   		if (log.isLoggable(Level.FINER)) {
   			log.finer("Entering setConfigurationWs method");
@@ -1015,7 +1076,7 @@ public class GenericExecutor implements GEPluginConstants {
 			HelperUtils.escapeCharsUnix(map);
 		}
 	}
-	
+	/*
 	private String[] prepareCommand(String subjectString) {
 		ArrayList<String> matchList = new ArrayList<String>();
 		Pattern regex = Pattern.compile("[^\\s\"']+|\"[^\"]*\"|'[^']*'");
@@ -1033,6 +1094,7 @@ public class GenericExecutor implements GEPluginConstants {
 		}
 		return matchList.toArray(new String[matchList.size()]);
 	}
+	*/
 	/*
 	private GEReturnObject executeLocalCommand(String[] command, long size) throws IOException, InterruptedException {
 		// add threads to read out and err
