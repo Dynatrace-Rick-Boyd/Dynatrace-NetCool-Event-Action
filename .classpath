@@ -5,6 +5,7 @@
     <classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
     <classpathentry kind="lib" path="lib/actionhelper_5.5.4.jar"/>
     <classpathentry kind="lib" path="lib/asm-4.0.jar"/>
+    <classpathentry kind="lib" path="lib/com.dynatrace.diagnostics.sdk.jar"/>
     <classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
     <classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
     <classpathentry kind="lib" path="lib/gmbal-api-only.jar"/>
