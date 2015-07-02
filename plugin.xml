@@ -36,6 +36,15 @@
         </visibility>
       </property>
       <property key="wsUsePrefix" label="WS Use Prefix" type="boolean" description="indicator which shows if plugin will add a namespace prefix to child elements in the SOAP request" default="false" />
+      <property key="isAuth" label="Use Authentication?" type="boolean" description="" default="true" />
+      <property key="userName" label="User Name" type="string" description="" default="default" multiline="false" />
+	    <visibility>
+          <rule key="isAuth" value="true" />
+        </visibility>
+      <property key="password" label="Password" type="password" description="" default="" />
+	    <visibility>
+          <rule key="isAuth" value="true" />
+        </visibility>
     </configuration>
   </extension>
   <extension point="com.dynatrace.diagnostics.pdk.action" id="com.dynatrace.diagnostics.plugin.NetCoolEventAction" name="NetCool Event Action">

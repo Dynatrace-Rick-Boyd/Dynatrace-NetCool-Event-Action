@@ -73,6 +73,8 @@ import com.predic8.xml.util.ExternalResolver;
 
 public class GenericExecutor implements GEPluginConstants {
 	private GEPluginProperties pp;
+	private GEPluginProperties ppauth;
+	private String nl = System.getProperty("line.separator");
 
 	private static final Logger log = Logger.getLogger(GenericExecutor.class.getName());
 	
@@ -89,6 +91,7 @@ public class GenericExecutor implements GEPluginConstants {
   			
   				pp = setConfigurationWs(env);
   //				pp.setWs(env.getConfigBoolean("isWS"));
+  				ppauth = setConfigurationWsAuth(env);
   			
   		} catch (Exception e) {
   			log.severe("setup method: " + e.getMessage());
@@ -507,11 +510,12 @@ public class GenericExecutor implements GEPluginConstants {
 	}
 	*/
 	// WS methods
-	private void executeRunPolicyWS() {
+	private void executeRunPolicyWS() throws SOAPException {
 		
 			// define service
 			QName operationQName = new QName(pp.getWsTargetNamespace(), "runPolicy");
 			QName portQName = new QName(pp.getWsTargetNamespace(), pp.getWsPortName());
+			String output;
 			javax.xml.ws.Service svc = javax.xml.ws.Service.create(operationQName);
 			svc.addPort(portQName, pp.getWsBindingId(), pp.getWsLocation());
 
@@ -542,9 +546,11 @@ public class GenericExecutor implements GEPluginConstants {
 		}
         if (log.isLoggable(Level.FINER)) {
 	        ByteArrayOutputStream out = new ByteArrayOutputStream();
-	        request.writeTo(out);
-	        String msgString = new String(out.toByteArray(), DEFAULT_ENCODING);
-	        log.finer("execute method: SOAP request is '" + msgString + "'");
+	        try {
+		        request.writeTo(out);
+		        String msgString = new String(out.toByteArray(), DEFAULT_ENCODING);
+		        log.finer("execute method: SOAP request is '" + msgString + "'");
+	        } catch (Throwable e) {}
         }
         // invoke web service
 		SOAPMessage response = dispatch.invoke(request);
@@ -567,16 +573,16 @@ public class GenericExecutor implements GEPluginConstants {
 	private void executeLoginWS() {
 		
 		// define service
-		QName operationQName = new QName(pp.getWsTargetNamespace(), "login");
-		QName portQName = new QName(pp.getWsTargetNamespace(), pp.getWsPortName());
+		QName operationQName = new QName(ppauth.getWsTargetNamespace(), "login");
+		QName portQName = new QName(ppauth.getWsTargetNamespace(), ppauth.getWsPortName());
 		javax.xml.ws.Service svc = javax.xml.ws.Service.create(operationQName);
-		svc.addPort(portQName, pp.getWsBindingId(), pp.getWsLocation());
+		svc.addPort(portQName, ppauth.getWsBindingId(), ppauth.getWsLocation());
 
 		// create dispatch object from this service
 		Dispatch<SOAPMessage> dispatch = svc.createDispatch(portQName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
 		// The soapActionUri is set here. otherwise we get an error on .net based services.
-		if (pp.isDotNET()) {
-		    String soapActionUri = new StringBuilder(pp.getWsTargetNamespace()).append("/").append(pp.getWsOperationName()).toString();
+		if (ppauth.isDotNET()) {
+		    String soapActionUri = new StringBuilder(ppauth.getWsTargetNamespace()).append("/").append(ppauth.getWsOperationName()).toString();
 	        dispatch.getRequestContext().put(Dispatch.SOAPACTION_USE_PROPERTY, new Boolean(true));
 	        dispatch.getRequestContext().put(Dispatch.SOAPACTION_URI_PROPERTY, soapActionUri);
 		    if (log.isLoggable(Level.FINER)) {
@@ -585,27 +591,35 @@ public class GenericExecutor implements GEPluginConstants {
 		}
 		
 		// add SOAP message
+		try {
 		MessageFactory factory = MessageFactory.newInstance();
 
 	    SOAPMessage request = factory.createMessage();
 	    SOAPEnvelope envelope = request.getSOAPPart().getEnvelope();
 	    
 	    SOAPBody soapBody = request.getSOAPBody();
-	    soapBody.addNamespaceDeclaration("q0", pp.getWsTargetNamespace());
-	    SOAPBodyElement soapBodyElement = soapBody.addBodyElement(envelope.createName(pp.getWsOperationName(), "q0", pp.getWsTargetNamespace()));
+	    soapBody.addNamespaceDeclaration("q0", ppauth.getWsTargetNamespace());
+	    SOAPBodyElement soapBodyElement;
+			soapBodyElement = soapBody.addBodyElement(envelope.createName(ppauth.getWsOperationName(), "q0", ppauth.getWsTargetNamespace()));
+
 	    // add parameters
-    for (Element p : pp.getWsOpParams().getArgList()) {
-    	addElement(p, getComplexTypeStructure(p.getName(), pp.getWsOpParams()), soapBodyElement, pp);
-	}
+    for (Element p : ppauth.getWsOpParams().getArgList()) {
+    	
+    	addElement(p, getComplexTypeStructure(p.getName(), ppauth.getWsOpParams()), soapBodyElement, ppauth);
+    	} 
+    
     if (log.isLoggable(Level.FINER)) {
+    	try {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         request.writeTo(out);
         String msgString = new String(out.toByteArray(), DEFAULT_ENCODING);
         log.finer("execute method: SOAP request is '" + msgString + "'");
+    	} catch (Throwable e){}
     }
     // invoke web service
 	SOAPMessage response = dispatch.invoke(request);
-			
+
+		
 	org.w3c.dom.Node wrapper = response.getSOAPBody().getFirstChild() ;
     while(wrapper.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
     	wrapper = wrapper.getNextSibling() ;
@@ -614,15 +628,30 @@ public class GenericExecutor implements GEPluginConstants {
     while(part.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
     	part = part.getNextSibling() ;
     }
-    output = part.getFirstChild().getNodeValue() ;
+    String output = part.getFirstChild().getNodeValue() ;
 
     if (log.isLoggable(Level.FINER)) {
     	log.finer("execute method: Web service returned '" + output + "'");
-    }
-}
+    }}
+    catch (Throwable e) {}
+	}
 
+
+    
+
+	private GEPluginProperties setConfigurationWs(PluginEnvironment env){
+		String parameters = env.getConfigString(CONFIG_WS_PARAMETERS);
+		String operation = env.getConfigString(CONFIG_WS_OPERATION_NAME);
+		return setConfigurationWsCore(env, parameters, operation);
+	}
 	
-  	private GEPluginProperties setConfigurationWs(PluginEnvironment env) {
+	private GEPluginProperties setConfigurationWsAuth(PluginEnvironment env){
+		String parameters = "String_1="+env.getConfigString("userName")+nl+"String_2="+env.getConfigPassword("password");
+		String operation = "login";
+		return setConfigurationWsCore(env, parameters, operation);
+	}
+	
+  	private GEPluginProperties setConfigurationWsCore(PluginEnvironment env,String params, String op) {
   		if (log.isLoggable(Level.FINER)) {
   			log.finer("Entering setConfigurationWs method");
   		}
@@ -638,6 +667,9 @@ public class GenericExecutor implements GEPluginConstants {
   		props.setWsOperationName(env.getConfigString(CONFIG_WS_OPERATION_NAME).trim());
   		
   		// get ws parameters
+  		
+
+  		
   		props.setWsParameters(env.getConfigString(CONFIG_WS_PARAMETERS));
   		Properties p = new Properties();
   	    try {
