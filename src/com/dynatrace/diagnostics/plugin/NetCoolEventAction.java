@@ -116,6 +116,7 @@ public class NetCoolEventAction implements Action {
 			for (Violation violation : incident.getViolations()) {
 				logInfo("Measure " + violation.getViolatedMeasure().getName() + " violated threshold.");
 				
+				// TODO
 				//addParams("description", "String", "name", "value");
 				addParams("Source dynaTrace Server", "String", "DT_SERVER", incident.getServerName());
 				addParams("Incident Message", "String", "MESSAGE", incident.getMessage());
