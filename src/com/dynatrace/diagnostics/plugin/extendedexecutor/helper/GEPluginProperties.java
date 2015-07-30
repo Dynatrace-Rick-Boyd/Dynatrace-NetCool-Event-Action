@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
 import com.dynatrace.diagnostics.plugin.actionhelper.HelperUtils;
-
 import com.predic8.schema.Element;
 import com.predic8.wsdl.AbstractAddress;
 import com.predic8.wsdl.Definitions;
@@ -37,12 +36,11 @@ public class GEPluginProperties {
 	private String dateFormatString;
 	private boolean capture;
 	private long outputBufferSize;
-
 	private String regex;
 	private Pattern pattern;
 	private String successDefinition;
 	// WS properties
-	private boolean ws = true;
+	private boolean ws;
 	private String wsWSDL;
 	private String wsOperationName;
 	private String wsPortName;
@@ -176,8 +174,6 @@ public class GEPluginProperties {
 	public void setOutputBufferSize(long outputBufferSize) {
 		this.outputBufferSize = outputBufferSize;
 	}
-
-
 	public String getRegex() {
 		return regex;
 	}

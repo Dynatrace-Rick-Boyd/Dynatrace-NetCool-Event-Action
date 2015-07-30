@@ -2,44 +2,22 @@
 <?eclipse version="3.2"?>
 <!-- plugin.xml file written by dynaTrace Client 6.1.0 -->
 <plugin>
-  <extension point="com.dynatrace.diagnostics.pdk.pluginconfig" id="com.dynatrace.diagnostics.plugin.NetCoolAction" name="NetCool Event Action">
+  <extension point="com.dynatrace.diagnostics.pdk.pluginconfig" id="com.dynatrace.diagnostics.plugin.NetCool" name="NetCool Event Action Plugin">
     <information>
       <category value="" />
       <displayname value="NetCool Event Action" />
-      <description value="This plugin sends incident details to Tivoli NetCool/Omnibus as events" />
+      <description value="This plugin sends incident details to NetCool Impact Web Services" />
       <supportlevel value="unsupported" />
     </information>
     <configuration>
-      <property key="wsdl" label="WS WSDL" type="string" description="URL to the WSDL file" default="" multiline="false" />
-      <property key="wsOperation" label="WS Operation" type="string" description="Name of the web service operation" default="" multiline="false" />
-      <property key="wsParameters" label="WS Parameters" type="string" description="Parameter-name=parameter-value pairs which will be used for substitution of parameters. One pair per line." default="" multiline="true" />
-      <property key="isWSProxy" label="Use Web Service Proxy?" type="boolean" description="Boolean indicator which is set to TRUE when WS are used and to FALSE when command is executing" default="false" />
-      <property key="isDotNET" label="isDotNET" type="boolean" description="Is &quot;true&quot; when plugin invokes .NET web service" default="false" />
-      <property key="wsProxyHost" label="WS Proxy Host" type="string" description="WS Proxy Host" default="" multiline="false">
-        <visibility>
-          <rule key="isWSProxy" value="true" />
-        </visibility>
-      </property>
-      <property key="wsProxyPort" label="WS Proxy Port" type="long" description="WS Proxy Port" default="6670">
-        <visibility>
-          <rule key="isWSProxy" value="true" />
-        </visibility>
-      </property>
-      <property key="wsProxyUser" label="WS Proxy Authentication User" type="string" description="User to authenticate access through proxy" default="" multiline="false">
-        <visibility>
-          <rule key="isWSProxy" value="true" />
-        </visibility>
-      </property>
-      <property key="wsProxyPassword" label="WS Proxy Authentication Password" type="password" description="Password which will be used to authenticate user's requests coming through the proxy" default="">
-        <visibility>
-          <rule key="isWSProxy" value="true" />
-        </visibility>
-      </property>
-      <property key="wsUsePrefix" label="WS Use Prefix" type="boolean" description="indicator which shows if plugin will add a namespace prefix to child elements in the SOAP request" default="false" />
+      <property key="loginName" label="Login User" type="string" description="User name to authenticate to Netcool Impact" default="user1" multiline="false" />
+      <property key="loginPass" label="Login Password" type="password" description="Password for user to authenticate to Netcool Impact" default="" />
+      <property key="serviceURL" label="Service URL" type="url" description="My property description ..." default="https://netcool-impact-server.mycompany.net/" />
+      <property key="command" label="Policy" type="string" description="Policy to be run by Impact (the &quot;string2&quot; parameter for runPolicy)" default="IT-vCO-Create-NetCoolEvent" multiline="false" />
+      <property key="configParams" label="Parameters" type="string" description="Parameters to pass to runPolicy, in form &quot;key=value&quot; (one per line)" default="key1=value1&#xD;&#xA;key2=value2" multiline="true" />
     </configuration>
   </extension>
-  <extension point="com.dynatrace.diagnostics.pdk.action" id="com.dynatrace.diagnostics.plugin.NetCoolEventAction" name="NetCool Event Action">
-    <plugin configid="com.dynatrace.diagnostics.plugin.NetCoolAction" class="com.dynatrace.diagnostics.plugin.NetCoolEventAction" />
+  <extension point="com.dynatrace.diagnostics.pdk.action" id="com.dynatrace.diagnostics.plugin.NetCool.action" name="NetCool Event Action">
+    <plugin configid="com.dynatrace.diagnostics.plugin.NetCool" class="com.dynatrace.diagnostics.plugin.NetCoolEventAction" />
   </extension>
 </plugin>
-

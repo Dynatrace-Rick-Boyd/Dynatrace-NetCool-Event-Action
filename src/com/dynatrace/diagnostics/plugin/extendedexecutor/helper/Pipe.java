@@ -8,11 +8,12 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.dynatrace.diagnostics.plugin.NetCoolEventAction;
 import com.dynatrace.diagnostics.plugin.actionhelper.HelperUtils;
-import com.dynatrace.diagnostics.plugin.extendedexecutor.GenericExecutor;
+
 
 public class Pipe implements Runnable {
-	private static final Logger log = Logger.getLogger(GenericExecutor.class.getName());
+	private static final Logger log = Logger.getLogger(NetCoolEventAction.class.getName());
 	private final InputStream in;
     private final OutputStream out;
     private final long size;
