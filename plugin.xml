@@ -15,36 +15,36 @@
       <property key="serviceURL" label="Service URL" type="url" description="My property description ..." default="https://netcool-impact-server.mycompany.net/" />
       <property key="command" label="Policy" type="string" description="Policy to be run by Impact (the &quot;string2&quot; parameter for runPolicy)" default="IT-vCO-Create-NetCoolEvent" multiline="false" />
       <property key="override" label="Override Parameter Names?" type="boolean" description="Parameters to pass to runPolicy, in form &quot;key=value&quot; (one per line)" default="false" />
-      <property key="keyDTServer" label="DT Server Parameter" type="string" description="My property description ..." default="" multiline="false" >
-	    <visibility>
+      <property key="keyDTServer" label="DT Server Parameter" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
           <rule key="override" value="true" />
         </visibility>
-	  </property>
-      <property key="keyIncidentName" label="Incident Name Parameter" type="string" description="My property description ..." default="" multiline="false"  >
-	    <visibility>
+      </property>
+      <property key="keyIncidentName" label="Incident Name Parameter" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
           <rule key="override" value="true" />
         </visibility>
-	  </property>
-      <property key="keyIncidentDesc" label="Incident Description Parameter" type="string" description="My property description ..." default="" multiline="false"  >
-	    <visibility>
+      </property>
+      <property key="keyIncidentDesc" label="Incident Description Parameter" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
           <rule key="override" value="true" />
         </visibility>
-	  </property>
-      <property key="keyViolatedMeasure" label="Violated Measure Parameter" type="string" description="My property description ..." default="" multiline="false"  >
-	    <visibility>
+      </property>
+      <property key="keyViolatedMeasure" label="Violated Measure Parameter" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
           <rule key="override" value="true" />
         </visibility>
-	  </property>
-      <property key="keySourceType" label="Source Type Parameter" type="string" description="My property description ..." default="" multiline="false"  >
-	    <visibility>
+      </property>
+      <property key="keySourceType" label="Source Type Parameter" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
           <rule key="override" value="true" />
         </visibility>
-	  </property>
-      <property key="keySourceName" label="Source Name Parameter" type="string" description="My property description ..." default="" multiline="false"  >
-	    <visibility>
+      </property>
+      <property key="keySourceName" label="Source Name Parameter" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
           <rule key="override" value="true" />
         </visibility>
-	  </property>
+      </property>
     </configuration>
   </extension>
   <extension point="com.dynatrace.diagnostics.pdk.action" id="com.dynatrace.diagnostics.plugin.NetCool.action" name="NetCool Event Action">
