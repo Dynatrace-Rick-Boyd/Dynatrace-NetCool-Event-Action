@@ -51,3 +51,4 @@
     <plugin configid="com.dynatrace.diagnostics.plugin.NetCool" class="com.dynatrace.diagnostics.plugin.NetCoolEventAction" />
   </extension>
 </plugin>
+

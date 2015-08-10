@@ -2,16 +2,15 @@ package com.dynatrace.diagnostics.plugin;
 
 import com.dynatrace.diagnostics.pdk.*;
 
-
 import java.net.URL;
-
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.ws.BindingProvider;
+
 
 
 
@@ -71,7 +70,7 @@ public class NetCoolEventAction implements Action {
 		command = env.getConfigString("command");
 		configParams = env.getConfigString("configParams");
 		
-		
+		params = new ArrayList<WSPolicyUserParameter>();
 		((BindingProvider)wsIFace).getRequestContext().put(
 	            BindingProvider.ENDPOINT_ADDRESS_PROPERTY, serviceURL.toString());
 		try {
