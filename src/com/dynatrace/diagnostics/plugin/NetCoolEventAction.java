@@ -158,6 +158,8 @@ public class NetCoolEventAction implements Action {
 				addParams("Source Type", "String", confSourceType, confSourceType, violation.getViolatedMeasure().getSource().getSourceType().toString());
 				addParams("Incident State", "String", confSourceName, confSourceName, violation.getViolatedMeasure().getSource().toString());
 				
+				logInfo("params map = " + params.toString());
+				
 				wsIFace.runPolicy(wslid, command, params, true);
 			}
 		}
