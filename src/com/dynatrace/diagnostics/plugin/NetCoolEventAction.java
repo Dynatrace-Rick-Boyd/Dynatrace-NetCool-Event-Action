@@ -156,7 +156,8 @@ public class NetCoolEventAction implements Action {
 				addParams("Unique ID", "String", confID, confID, incident.getKey().getUUID());
 				addParams("Severity", "String", confSeverity, confSeverity, incident.getSeverity().getCode());
 				addParams("Source Type", "String", confSourceType, confSourceType, violation.getViolatedMeasure().getSource().getSourceType().toString());
-				addParams("Incident State", "String", confSourceName, confSourceName, violation.getViolatedMeasure().getSource().toString());
+				addParams("Source Name", "String", confSourceName, confSourceName, violation.getViolatedMeasure().getSource().toString());
+				addParams("Incident State", "String", confState, confState, incident.getState());
 				
 				logInfo("params map = " + params.toString());
 				
