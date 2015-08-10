@@ -34,6 +34,17 @@ public class NetCoolEventAction implements Action {
 	String command;
 	String configParams;
 	
+	String confServer = "DYN_SERVER";
+	String confName = "DYN_INCIDENT";
+	String confDesc = "DYN_DESCRIPTION";
+	String confViolatedMeasure = "DYN_VIOLATEDMEASURE";
+	String confSourceType = "DYN_SOURCETYPE";
+	String confSourceName = "DYN_SOURCENAME";
+	String confSeverity = "DYN_SEVERITY";
+	String confState = "DYN_STATE";
+	String confID = "DYN_UID";
+	String confSP = "DYN_SYSTEMPROFILE";
+	
 
 	
 	/**
@@ -106,7 +117,27 @@ public class NetCoolEventAction implements Action {
 	 */
 	@Override
 	public Status execute(ActionEnvironment env) throws Exception {
-		
+		String config;
+		if((config = env.getConfigString("keyDTServer"))!=null)
+			confServer = config;
+		if((config = env.getConfigString("keyIncidentName"))!=null)
+			confName = config;
+		if((config = env.getConfigString("keyIncidentDesc"))!=null)
+			confDesc = config;
+		if((config = env.getConfigString("keyViolatedMeasure"))!=null)
+			confViolatedMeasure = config;
+		if((config = env.getConfigString("keySourceType"))!=null)
+			confSourceType = config;
+		if((config = env.getConfigString("keySourceName"))!=null)
+			confSourceName = config;
+		if((config = env.getConfigString("keySeverity"))!=null)
+			confSeverity = config;
+		if((config = env.getConfigString("keyState"))!=null)
+			confState = config;
+		if((config = env.getConfigString("keyID"))!=null)
+			confID = config;
+		if((config = env.getConfigString("keySystemProfile"))!=null)
+			confSP = config;
 		// this sample shows how to receive and act on incidents
 		Collection<Incident> incidents = env.getIncidents();
 		for (Incident incident : incidents) {
@@ -116,9 +147,16 @@ public class NetCoolEventAction implements Action {
 				logInfo("Measure " + violation.getViolatedMeasure().getName() + " violated threshold.");
 				
 				// TODO
-				//addParams("description", "String", "name", "value");
-				addParams("Source dynaTrace Server", "String", "DT_SERVER", incident.getServerName());
-				addParams("Incident Message", "String", "MESSAGE", incident.getMessage());
+				//addParams("description", "String","label", "name", "value");
+				addParams("Source dynaTrace Server", "String",confServer, confServer, incident.getServerName());
+				addParams("Incident Message", "String", confDesc, confDesc, incident.getMessage());
+				addParams("Incident Name", "String", confName, confName, incident.getIncidentRule().getName());
+				addParams("Violated Measure", "String", confViolatedMeasure, confViolatedMeasure, violation.getViolatedMeasure().getName());
+				addParams("System Profile", "String", confSP, confSP, env.getSystemProfileName());
+				addParams("Unique ID", "String", confID, confID, incident.getKey().getUUID());
+				addParams("Severity", "String", confSeverity, confSeverity, incident.getSeverity().getCode());
+				addParams("Source Type", "String", confSourceType, confSourceType, violation.getViolatedMeasure().getSource().getSourceType().toString());
+				addParams("Incident State", "String", confSourceName, confSourceName, violation.getViolatedMeasure().getSource().toString());
 				
 				wsIFace.runPolicy(wslid, command, params, true);
 			}
@@ -170,17 +208,21 @@ public class NetCoolEventAction implements Action {
 		// TODO
 	}
 
-	private void addParams(String desc, String format, String label, String value) {
+	private void addParams(String desc, String format, String label, String name, String value) {
 		WSPolicyUserParameter param = new WSPolicyUserParameter();
 		param.setFormat(format);
 		
 		param.setDesc(desc);
 		param.setLabel(label);
+		param.setName(name);
 		param.setValue(value);
 		
 		params.add(param);
 	}
-	
+	private void addParams(String desc, String format, String label, String name, int value) {	
+		Integer i = value;
+		addParams(desc, format, label, name, i.toString());
+	}
 	private void logInfo(String message){
 		if (log.isLoggable(Level.INFO))
 			log.info(message);
