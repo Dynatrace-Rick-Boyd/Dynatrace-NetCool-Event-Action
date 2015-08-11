@@ -86,5 +86,10 @@ public class WSListenerId {
     public void setObjectId(String value) {
         this.objectId = value;
     }
+    
+    @Override
+    public String toString() {
+    	return getClientId() + ":" + getObjectId();
+    }
 
 }

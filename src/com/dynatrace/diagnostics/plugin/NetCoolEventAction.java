@@ -26,6 +26,7 @@ public class NetCoolEventAction implements Action {
 	private ImpactWebServiceListenerDLIfc wsIFace;
 	WSListenerId wslid;
 	private List<WSPolicyUserParameter> params;
+	private List<PolicyExecutionResult> results;
 	
 	//Config parameters
 	String loginName;
@@ -72,25 +73,7 @@ public class NetCoolEventAction implements Action {
 	 */
 	@Override
 	public Status setup(ActionEnvironment env) throws Exception {
-		wsService = new ImpactWebServiceListenerDL();
-		wsIFace = wsService.getImpactWebServiceListenerDLIfcPort();
-		
-		loginName = env.getConfigString("loginName");
-		loginPass = env.getConfigPassword("loginPass");
-		serviceURL = env.getConfigUrl("serviceURL");
-		command = env.getConfigString("command");
-		configParams = env.getConfigString("configParams");
-		
-		params = new ArrayList<WSPolicyUserParameter>();
-		((BindingProvider)wsIFace).getRequestContext().put(
-	            BindingProvider.ENDPOINT_ADDRESS_PROPERTY, serviceURL.toString());
-		try {
-			wslid = wsIFace.login(loginName, loginPass);
-		} catch (WSListenerException e) {
-			logSevere("Login Failed.  Exception: " + e.getMessage());
-			return new Status(Status.StatusCode.ErrorTargetService);
-		}
-		
+		logFine("start setup() method");
 		return new Status(Status.StatusCode.Success);
 	}
 
@@ -117,28 +100,58 @@ public class NetCoolEventAction implements Action {
 	 */
 	@Override
 	public Status execute(ActionEnvironment env) throws Exception {
+		logFine("Start execute() method");
+				
+		wsService = new ImpactWebServiceListenerDL();
+		wsIFace = wsService.getImpactWebServiceListenerDLIfcPort();
+		
+		
+		loginName = env.getConfigString("loginName");
+		loginPass = env.getConfigPassword("loginPass");
+		serviceURL = env.getConfigUrl("serviceURL");
+		command = env.getConfigString("command");
+		configParams = env.getConfigString("configParams");
+		
+		logFine("executing login request using serviceURL " + serviceURL.toString());
+		params = new ArrayList<WSPolicyUserParameter>();
+		((BindingProvider)wsIFace).getRequestContext().put(
+	            BindingProvider.ENDPOINT_ADDRESS_PROPERTY, serviceURL.toString());
+		try {
+			wslid = wsIFace.login(loginName, loginPass);
+		} catch (WSListenerException e) {
+			logSevere("Login Failed.  Exception: " + e.getMessage());
+			return new Status(Status.StatusCode.ErrorTargetService);
+		}
+		logInfo("Login Successful.  Token value: " + wslid.toString());
+
 		String config;
-		if((config = env.getConfigString("keyDTServer"))!=null)
-			confServer = config;
-		if((config = env.getConfigString("keyIncidentName"))!=null)
-			confName = config;
-		if((config = env.getConfigString("keyIncidentDesc"))!=null)
-			confDesc = config;
-		if((config = env.getConfigString("keyViolatedMeasure"))!=null)
-			confViolatedMeasure = config;
-		if((config = env.getConfigString("keySourceType"))!=null)
-			confSourceType = config;
-		if((config = env.getConfigString("keySourceName"))!=null)
-			confSourceName = config;
-		if((config = env.getConfigString("keySeverity"))!=null)
-			confSeverity = config;
-		if((config = env.getConfigString("keyState"))!=null)
-			confState = config;
-		if((config = env.getConfigString("keyID"))!=null)
-			confID = config;
-		if((config = env.getConfigString("keySystemProfile"))!=null)
-			confSP = config;
-		// this sample shows how to receive and act on incidents
+		if(env.getConfigBoolean("override")){
+			if((config = env.getConfigString("keyDTServer"))!=null)
+				confServer = config;
+			if((config = env.getConfigString("keyIncidentName"))!=null)
+				confName = config;
+			if((config = env.getConfigString("keyIncidentDesc"))!=null)
+				confDesc = config;
+			if((config = env.getConfigString("keyViolatedMeasure"))!=null)
+				confViolatedMeasure = config;
+			if((config = env.getConfigString("keySourceType"))!=null)
+				confSourceType = config;
+			if((config = env.getConfigString("keySourceName"))!=null)
+				confSourceName = config;
+			if((config = env.getConfigString("keySeverity"))!=null)
+				confSeverity = config;
+			if((config = env.getConfigString("keyState"))!=null)
+				confState = config;
+			if((config = env.getConfigString("keyID"))!=null)
+				confID = config;
+			if((config = env.getConfigString("keySystemProfile"))!=null)
+				confSP = config;
+			logFine("Done.");
+		} else {
+			logFine("Using default parameter names");
+		}
+
+		logFine("Populating incident collection");
 		Collection<Incident> incidents = env.getIncidents();
 		for (Incident incident : incidents) {
 			String message = incident.getMessage();
@@ -146,7 +159,7 @@ public class NetCoolEventAction implements Action {
 			for (Violation violation : incident.getViolations()) {
 				logInfo("Measure " + violation.getViolatedMeasure().getName() + " violated threshold.");
 				
-				// TODO
+				logFine("adding Params for violation");
 				//addParams("description", "String","label", "name", "value");
 				addParams("Source dynaTrace Server", "String",confServer, confServer, incident.getServerName());
 				addParams("Incident Message", "String", confDesc, confDesc, incident.getMessage());
@@ -158,15 +171,24 @@ public class NetCoolEventAction implements Action {
 				addParams("Source Type", "String", confSourceType, confSourceType, violation.getViolatedMeasure().getSource().getSourceType().toString());
 				addParams("Source Name", "String", confSourceName, confSourceName, violation.getViolatedMeasure().getSource().toString());
 				addParams("Incident State", "String", confState, confState, incident.getState());
-				
-				logInfo("params map = " + params.toString());
-				
-				wsIFace.runPolicy(wslid, command, params, true);
+				logFine("Params added successfully");						
+			}
+
+		}
+		logFine("Executing runPolicy for policy " + command + " against " + serviceURL);
+		try {
+			results = wsIFace.runPolicy(wslid, command, params, true);		
+		} catch (WSListenerException e) {
+			logSevere("Exception caught on execution of runPolicy: " +e.getMessage());
+			return new Status(Status.StatusCode.ErrorTargetServiceExecutionFailed);
+		}
+		logInfo("runPolicy executed successfully");
+		if (log.isLoggable(Level.FINE)) {
+			logFine("Results returned:");
+			for (PolicyExecutionResult result : results) {
+				logFine("- Name: "+ result.getName()+ " | Value: " + result.getValue());
 			}
 		}
-		
-
-		
 		return new Status(Status.StatusCode.Success);
 	}
 
@@ -208,7 +230,7 @@ public class NetCoolEventAction implements Action {
 	 */
 	@Override
 	public void teardown(ActionEnvironment env) throws Exception {
-		// TODO
+		logFine("Enter teardown() method");
 	}
 
 	private void addParams(String desc, String format, String label, String name, String value) {
@@ -219,13 +241,18 @@ public class NetCoolEventAction implements Action {
 		param.setLabel(label);
 		param.setName(name);
 		param.setValue(value);
-		
+		logFine("Adding parameter " + name + " with value " + value);
 		params.add(param);
 	}
 	private void addParams(String desc, String format, String label, String name, int value) {	
 		Integer i = value;
 		addParams(desc, format, label, name, i.toString());
 	}
+	private void logFine(String message){
+		if (log.isLoggable(Level.FINE))
+			log.fine(message);
+	}
+	
 	private void logInfo(String message){
 		if (log.isLoggable(Level.INFO))
 			log.info(message);

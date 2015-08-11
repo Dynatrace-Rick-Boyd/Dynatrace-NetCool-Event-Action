@@ -45,14 +45,29 @@
           <rule key="override" value="true" />
         </visibility>
       </property>
-      <property key="keySeverity" label="Severity" type="string" description="My property description ..." default="" multiline="false" />
-      <property key="keyID" label="Incident ID" type="string" description="My property description ..." default="" multiline="false" />
-      <property key="keySystemProfile" label="System Profile" type="string" description="My property description ..." default="" multiline="false" />
-      <property key="keyState" label="Incident State" type="string" description="My property description ..." default="" multiline="false" />
+      <property key="keySeverity" label="Severity" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
+          <rule key="override" value="true" />
+        </visibility>
+      </property>
+      <property key="keyID" label="Incident ID" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
+          <rule key="override" value="true" />
+        </visibility>
+      </property>
+      <property key="keySystemProfile" label="System Profile" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
+          <rule key="override" value="true" />
+        </visibility>
+      </property>
+      <property key="keyState" label="Incident State" type="string" description="My property description ..." default="" multiline="false">
+        <visibility>
+          <rule key="override" value="true" />
+        </visibility>
+      </property>
     </configuration>
   </extension>
   <extension point="com.dynatrace.diagnostics.pdk.action" id="com.dynatrace.diagnostics.plugin.NetCool.action" name="NetCool Event Action">
     <plugin configid="com.dynatrace.diagnostics.plugin.NetCool" class="com.dynatrace.diagnostics.plugin.NetCoolEventAction" />
   </extension>
 </plugin>
-
