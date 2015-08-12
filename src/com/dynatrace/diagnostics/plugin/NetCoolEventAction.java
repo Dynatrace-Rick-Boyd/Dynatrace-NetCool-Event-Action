@@ -156,21 +156,24 @@ public class NetCoolEventAction implements Action {
 		for (Incident incident : incidents) {
 			String message = incident.getMessage();
 			logInfo("Incident " + message + " triggered.");
+			
+			logFine("adding Params for incident");
+			addParams("Source dynaTrace Server", "String",confServer, confServer, incident.getServerName());
+			addParams("Incident Message", "String", confDesc, confDesc, incident.getMessage());
+			addParams("Incident Name", "String", confName, confName, incident.getIncidentRule().getName());
+			addParams("System Profile", "String", confSP, confSP, env.getSystemProfileName());
+			addParams("Unique ID", "String", confID, confID, incident.getKey().getUUID());
+			addParams("Severity", "String", confSeverity, confSeverity, incident.getSeverity().getCode());
+			addParams("Incident State", "String", confState, confState, incident.getState());
+			
 			for (Violation violation : incident.getViolations()) {
 				logInfo("Measure " + violation.getViolatedMeasure().getName() + " violated threshold.");
 				
 				logFine("adding Params for violation");
-				//addParams("description", "String","label", "name", "value");
-				addParams("Source dynaTrace Server", "String",confServer, confServer, incident.getServerName());
-				addParams("Incident Message", "String", confDesc, confDesc, incident.getMessage());
-				addParams("Incident Name", "String", confName, confName, incident.getIncidentRule().getName());
+				//addParams(description, "String", label, name, value);
 				addParams("Violated Measure", "String", confViolatedMeasure, confViolatedMeasure, violation.getViolatedMeasure().getName());
-				addParams("System Profile", "String", confSP, confSP, env.getSystemProfileName());
-				addParams("Unique ID", "String", confID, confID, incident.getKey().getUUID());
-				addParams("Severity", "String", confSeverity, confSeverity, incident.getSeverity().getCode());
 				addParams("Source Type", "String", confSourceType, confSourceType, violation.getViolatedMeasure().getSource().getSourceType().toString());
 				addParams("Source Name", "String", confSourceName, confSourceName, violation.getViolatedMeasure().getSource().toString());
-				addParams("Incident State", "String", confState, confState, incident.getState());
 				logFine("Params added successfully");						
 			}
 

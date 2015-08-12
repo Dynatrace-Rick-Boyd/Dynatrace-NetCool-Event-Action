@@ -67,7 +67,7 @@
       </property>
     </configuration>
   </extension>
-  <extension point="com.dynatrace.diagnostics.pdk.action" id="com.dynatrace.diagnostics.plugin.NetCool.action" name="NetCool Event Action">
+  <extension point="com.dynatrace.diagnostics.pdk.action" id="com.dynatrace.diagnostics.plugin.NetCoolEventAction" name="NetCool Event Action">
     <plugin configid="com.dynatrace.diagnostics.plugin.NetCool" class="com.dynatrace.diagnostics.plugin.NetCoolEventAction" />
   </extension>
 </plugin>

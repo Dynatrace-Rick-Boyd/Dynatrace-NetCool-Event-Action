@@ -9,7 +9,7 @@ Bundle-ClassPath: .,lib/actionhelper_5.5.4.jar,lib/asm-4.0.jar,lib/com
  b/jaxws-rt.jar,lib/jaxws-tools.jar,lib/policy.jar,lib/soa-model-core-
  1.4.1.4.jar,lib/soa-model-distribution-1.4.1.4.jar,lib/stax-ex.jar,li
  b/streambuffer.jar,lib/trilead-ssh2-build213.jar
-Bundle-Version: 0.1.6
+Bundle-Version: 0.1.7
 Bundle-Name: NetCool Event Action
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.dynatrace.diagnostics.plugin.NetCool;singleto
