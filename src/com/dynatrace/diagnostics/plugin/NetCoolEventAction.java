@@ -165,17 +165,30 @@ public class NetCoolEventAction implements Action {
 			addParams("Unique ID", "String", confID, confID, incident.getKey().getUUID());
 			addParams("Severity", "String", confSeverity, confSeverity, incident.getSeverity().getCode());
 			addParams("Incident State", "String", confState, confState, incident.getState());
-			
-			for (Violation violation : incident.getViolations()) {
-				logInfo("Measure " + violation.getViolatedMeasure().getName() + " violated threshold.");
+			Collection<Violation> violations = incident.getViolations();
+			if (violations == null|| violations.equals(null)||violations.isEmpty()) {
+				logInfo("Incident not based on condition measure.");
 				
-				logFine("adding Params for violation");
+				logFine("adding default Params for violation");
 				//addParams(description, "String", label, name, value);
-				addParams("Violated Measure", "String", confViolatedMeasure, confViolatedMeasure, violation.getViolatedMeasure().getName());
-				addParams("Source Type", "String", confSourceType, confSourceType, violation.getViolatedMeasure().getSource().getSourceType().toString());
-				addParams("Source Name", "String", confSourceName, confSourceName, violation.getViolatedMeasure().getSource().toString());
-				logFine("Params added successfully");						
+				addParams("Violated Measure", "String", confViolatedMeasure, confViolatedMeasure, "Not applicable");
+				addParams("Source Type", "String", confSourceType, confSourceType, "Not applicable");
+				addParams("Source Name", "String", confSourceName, confSourceName, "Not applicable");
+				logFine("Params added successfully");
+			} else {
+				for (Violation violation : incident.getViolations()) {
+					if(!violation.getViolatedMeasure().getSource().toString().equals("@"));
+					logInfo("Measure " + violation.getViolatedMeasure().getName() + " violated threshold.");
+					
+					logFine("adding Params for violation");
+					//addParams(description, "String", label, name, value);
+					addParams("Violated Measure", "String", confViolatedMeasure, confViolatedMeasure, violation.getViolatedMeasure().getName());
+					addParams("Source Type", "String", confSourceType, confSourceType, violation.getViolatedMeasure().getSource().getSourceType().toString());
+					addParams("Source Name", "String", confSourceName, confSourceName, violation.getViolatedMeasure().getSource().toString());
+					logFine("Params added successfully");						
+				}
 			}
+			
 
 		}
 		logFine("Executing runPolicy for policy " + command + " against " + serviceURL);

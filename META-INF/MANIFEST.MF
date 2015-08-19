@@ -1,15 +1,11 @@
 Manifest-Version: 1.0
 Require-Bundle: com.dynatrace.diagnostics.sdk
 Bundle-Vendor: Rick Boyd
-Bundle-ClassPath: .,lib/actionhelper_5.5.4.jar,lib/asm-4.0.jar,lib/com
- .dynatrace.diagnostics.sdk.jar,lib/commons-lang3-3.1.jar,lib/commons-
- logging-1.1.1.jar,lib/gmbal-api-only.jar,lib/groovy-2.0.4.jar,lib/gro
- ovy-xml-2.0.4.jar,lib/httpclient-4.2.2.jar,lib/httpcore-4.2.2.jar,lib
- /jaxb-api.jar,lib/jaxb-impl.jar,lib/jaxb-xjc.jar,lib/jaxws-api.jar,li
- b/jaxws-rt.jar,lib/jaxws-tools.jar,lib/policy.jar,lib/soa-model-core-
- 1.4.1.4.jar,lib/soa-model-distribution-1.4.1.4.jar,lib/stax-ex.jar,li
- b/streambuffer.jar,lib/trilead-ssh2-build213.jar
-Bundle-Version: 0.1.7
+Bundle-ClassPath: .,lib/asm-4.0.jar,lib/com.dynatrace.diagnostics.sdk.
+ jar,lib/gmbal-api-only.jar,lib/jaxb-api.jar,lib/jaxb-impl.jar,lib/jax
+ b-xjc.jar,lib/jaxws-api.jar,lib/jaxws-rt.jar,lib/jaxws-tools.jar,lib/
+ policy.jar,lib/stax-ex.jar,lib/streambuffer.jar
+Bundle-Version: 0.1.8
 Bundle-Name: NetCool Event Action
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.dynatrace.diagnostics.plugin.NetCool;singleto
